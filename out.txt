@@ -1,4 +1,9 @@
 The prime numbers are:
+2
+3
+5
+7
+The prime numbers are:
 11
 13
 17

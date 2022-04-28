@@ -26,6 +26,8 @@ void write(string s) {
 int main() {
     int range0,range1;
     fstream file;
+    file.open("out.txt",ios::out);
+    file.close();
     file.open("in.txt");
     if (!file)
         cout << "no file with this name" << endl;
