@@ -7,6 +7,10 @@ How to use the file::
 - Build using "g++ main.cpp" command 
 - Run by ""./a.out T" command 
 */
+struct threadInp
+{
+int numOfThreads,r0,r1;
+} ;
 
 // Global Variables 
 int numOfPrimes=0,totalNums=0;
@@ -28,17 +32,21 @@ void write(string s) {
         file.close();
 }
 
-/*
-// worker function (numberoftheThread,range 0 ,range 1){
-    // print its number (0 to T-1)(numberoftheThread) and the range of numbers that it is operating on. 
-    format=="ThreadID=0, startNum=1000, endNum=1050"
+void *Worker(void * tInput){
+    threadInp * n = (threadInp *) tInput;
+    int range0 = n->r0;
+    int range1 = n->r1;
+    cout<<"ThreadID="<<n->numOfThreads<<", startNum="<<range0<<", endNum="<<range1<<endl;
+    for (int i=range0;i<range1;i++){
+        totalNums++;
+        if(isPrime(i)){
+            numOfPrimes++;
+            primeList.push_back(i);
+        } 
+         } 
+      pthread_exit(NULL);   
+}
 
-    // check is prime for all the numbers in range  (check for Basic isPrime Test implementation)
-
-
-    //v2 note : add thread-safe code
-}   
-*/
 
 
 int main(int argc, char *argv[]) {
@@ -92,16 +100,28 @@ int main(int argc, char *argv[]) {
     
     int startRange = range0;
     int endRange = startRange + stepSize;
-    
+    threadInp tInput[T];
     for(int i=0;i<T;i++){
         if(remainingSteps){
             endRange++;
             remainingSteps--;
         }
         // create thread number i ;
-     // int rc = pthread_create(&threads[i], NULL, , (void *)i);  
+        
+        tInput[i].numOfThreads = i;
+        tInput[i].r0 = startRange;
+        tInput[i].r1 = endRange;
+        int rc = pthread_create(&threads[i], NULL,Worker,&tInput[i]);  
+        if (rc)
+        {
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
         startRange = endRange;
         endRange = endRange + stepSize;
+
+   
+   
     }
     
 
