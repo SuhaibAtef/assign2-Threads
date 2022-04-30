@@ -37,8 +37,7 @@ void write(string s) {
 
 
     //v2 note : add thread-safe code
-}
-    
+}   
 */
 
 
@@ -78,32 +77,42 @@ int main(int argc, char *argv[]) {
     } 
 
      
-    /*
-    // create threads array 
+    
+    // create threads array
+    pthread_t threads[T]; 
 
     // find true range range 1 - range 0
-
     // find stepSize = (floor(range/T));
 
+    int stepSize = floor((range1 - range0)/T); 
     // find remainingSteps = range mod T ; 
+    int remainingSteps = (range1 - range0) % T; 
 
     // this is psuedo code for the dividing range for threads 
-
-    pointer = startRange
-    pointer2 = endRange = startRange + stepSize;  
-    for(each thread){
+    
+    int startRange = range0;
+    int endRange = startRange + stepSize;
+    
+    for(int i=0;i<T;i++){
         if(remainingSteps){
             endRange++;
-            remaining--;
+            remainingSteps--;
         }
-        // create thread number i ; 
-        startrange = endrange;
-        endRange = endrange + stepSize;
+        // create thread number i ;
+     // int rc = pthread_create(&threads[i], NULL, , (void *)i);  
+        startRange = endRange;
+        endRange = endRange + stepSize;
     }
-    */
-
-    //all threads are done,(join) 
     
+
+    //all threads are done,(join)
+    for (int i = 0; i < T; i++)
+    {
+        pthread_join(threads[i],NULL);
+    }
+     
+    
+
     //print the total number of prime numbers found (STDOUT)
     cout<<"numOfPrime="<<numOfPrimes<<", totalNums="<<totalNums<<endl;
 
