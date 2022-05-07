@@ -48,9 +48,12 @@ void *Worker(void *tInput)
     threadInp *n = (threadInp *)tInput;
     int range0 = n->r0;
     int range1 = n->r1;
+    mtx.lock();
     cout << "ThreadID=" << n->numOfThreads << ", startNum=" << range0 << ", endNum=" << range1 << endl;
+
     for (int i = range0; i < range1; i++)
     {
+
         totalNums++;
         if (isPrime(i))
         {
@@ -58,7 +61,7 @@ void *Worker(void *tInput)
             primeList.push_back(i);
         }
     }
-
+    mtx.unlock();
     pthread_exit(NULL);
 }
 
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
 
     else
         T = 1;
-    cout << T << endl;
+    cout << "Number of choosen Threads: " << T << endl;
 
     // Inputs:: Range 0 and Range 1
     if (!file)
@@ -145,7 +148,7 @@ int main(int argc, char *argv[])
     }
 
     // print the total number of prime numbers found (STDOUT)
-    // cout<<"numOfPrime="<<numOfPrimes<<", totalNums="<<totalNums<<endl;
+    cout << "numOfPrime=" << numOfPrimes << ", totalNums=" << totalNums << endl;
 
     // print all these numbers. (out.txt)
     write("The prime numbers are:");
