@@ -7,6 +7,7 @@ How to use the file::
 - Build using "g++ main.cpp" command 
 - Run by ""./a.out T" command 
 */
+
 struct threadInp
 {
 int numOfThreads,r0,r1;
@@ -42,8 +43,10 @@ void *Worker(void * tInput){
         if(isPrime(i)){
             numOfPrimes++;
             primeList.push_back(i);
+            
         } 
-         } 
+     } 
+       
       pthread_exit(NULL);   
 }
 
@@ -74,18 +77,6 @@ int main(int argc, char *argv[]) {
         file >> range0 >>range1;
     }
     file.close();
-
-    /*Basic isPrime Test*/
-    for (int i=range0;i<range1;i++){
-        totalNums++;
-        if(isPrime(i)){
-            numOfPrimes++;
-            primeList.push_back(i);
-        }
-    } 
-
-     
-    
     // create threads array
     pthread_t threads[T]; 
 
@@ -102,6 +93,10 @@ int main(int argc, char *argv[]) {
     int endRange = startRange + stepSize;
     threadInp tInput[T];
     for(int i=0;i<T;i++){
+        if(T>(range1-range0)){
+            cout<<"You Just Saved : "<<T-(range1-range0)<<endl;
+            T=range1-range0;
+        }
         if(remainingSteps){
             endRange++;
             remainingSteps--;
@@ -120,13 +115,11 @@ int main(int argc, char *argv[]) {
         startRange = endRange;
         endRange = endRange + stepSize;
 
-   
-   
     }
     
 
     //all threads are done,(join)
-    for (int i = 0; i < T; i++)
+    for (int i = 0; i <T; i++)
     {
         pthread_join(threads[i],NULL);
     }
@@ -134,7 +127,7 @@ int main(int argc, char *argv[]) {
     
 
     //print the total number of prime numbers found (STDOUT)
-    cout<<"numOfPrime="<<numOfPrimes<<", totalNums="<<totalNums<<endl;
+   // cout<<"numOfPrime="<<numOfPrimes<<", totalNums="<<totalNums<<endl;
 
     //print all these numbers. (out.txt)
     write("The prime numbers are:");

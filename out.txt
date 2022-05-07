@@ -1,9 +1,0 @@
-The prime numbers are:
-11
-13
-17
-19
-11
-13
-17
-19
