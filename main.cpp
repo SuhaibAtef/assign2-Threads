@@ -1,7 +1,6 @@
 #include "bits/stdc++.h"
 #include <pthread.h>
-#include <thread> // thread
-#include <mutex>  // mutex
+#include <mutex> // mutex
 
 using namespace std;
 
@@ -11,7 +10,8 @@ How to use the file::
 - Run by ""./a.out T" command
 */
 
-std::mutex mtx; // mutex for critical section
+mutex mtx; // mutex for critical section
+// Struct for passing input values for the threads.
 struct threadInp
 {
     int numOfThreads, r0, r1;
@@ -19,7 +19,7 @@ struct threadInp
 
 // Global Variables
 int numOfPrimes = 0, totalNums = 0;
-vector<int> primeList;
+vector<int> primeList; // Vector to hold prime numbers.
 
 // isPrime function that tests if the number(num) is prime or not.
 bool isPrime(int num)
@@ -32,7 +32,7 @@ bool isPrime(int num)
     return true;
 }
 
-// write function that appends the text(s) to the out.txt file.
+// A function that appends the text(s) to the out.txt file.
 void write(string s)
 {
 
@@ -42,26 +42,28 @@ void write(string s)
     file.close();
 }
 
+// Worker Thread that takes a range of numbers that consists of (range 1 - range 0) and tests if the numbers are prime or not.
 void *Worker(void *tInput)
 {
 
     threadInp *n = (threadInp *)tInput;
     int range0 = n->r0;
     int range1 = n->r1;
-    mtx.lock();
+    mtx.lock(); // Critical Section starts
     cout << "ThreadID=" << n->numOfThreads << ", startNum=" << range0 << ", endNum=" << range1 << endl;
 
     for (int i = range0; i < range1; i++)
     {
 
         totalNums++;
+        // if the number is prime increase the total prime numbers and push the number to the list.
         if (isPrime(i))
         {
             numOfPrimes++;
             primeList.push_back(i);
         }
     }
-    mtx.unlock();
+    mtx.unlock(); // Critical Section Ends
     pthread_exit(NULL);
 }
 
@@ -79,7 +81,9 @@ int main(int argc, char *argv[])
     // Arguments
     if (argv[1] != NULL)
     {
+        // takes the argument as the number of threads.
         T = atoi(argv[1]);
+        // Case:: number is negative or Zero.
         if (T <= 0)
         {
             T = 1;
@@ -88,10 +92,14 @@ int main(int argc, char *argv[])
     }
 
     else
+    // Case:: No arguments were provided.
+    {
         T = 1;
+        cout << "NO ARGUMENTS WERE PROVIDED : Default Thread value (T=1) is used." << endl;
+    }
     cout << "Number of choosen Threads: " << T << endl;
 
-    // Inputs:: Range 0 and Range 1
+    // Case:: No input file in the directory.
     if (!file)
         cout << "no file with this name" << endl;
     else
@@ -99,17 +107,20 @@ int main(int argc, char *argv[])
         file >> range0 >> range1;
     }
     file.close();
-    // create threads array
+
+    // Threads array to hold the threads.
     pthread_t threads[T];
 
-    // find true range range 1 - range 0
-    // find stepSize = (floor(range/T));
-
+    // StepSize = (floor(range/T));
     int stepSize = floor((range1 - range0) / T);
-    // find remainingSteps = range mod T ;
+
+    // RemainingSteps = range mod T ;
     int remainingSteps = (range1 - range0) % T;
 
-    // this is psuedo code for the dividing range for threads
+    /*
+    Algorithm:  There are two pointers (startRange,endRange) that points to the start and end of the thread range
+                the two pointers increase with amount that is equal to the stepSize.
+    */
 
     int startRange = range0;
     int endRange = startRange + stepSize;
@@ -126,31 +137,34 @@ int main(int argc, char *argv[])
             endRange++;
             remainingSteps--;
         }
-        // create thread number i ;
-
+        // Creating thread number i
+        // 1) we declare the inputs for the thread.
         tInput[i].numOfThreads = i;
         tInput[i].r0 = startRange;
         tInput[i].r1 = endRange;
+        // 2) we create the thread.
         int rc = pthread_create(&threads[i], NULL, Worker, &tInput[i]);
+        // Case:: no thread was created.
         if (rc)
         {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
         }
+        // 3) we increase the pointers for the next thread.
         startRange = endRange;
         endRange = endRange + stepSize;
     }
 
-    // all threads are done,(join)
+    // (Joining Threads): all threads are done.
     for (int i = 0; i < T; i++)
     {
         pthread_join(threads[i], NULL);
     }
 
-    // print the total number of prime numbers found (STDOUT)
+    // Printing the total number of prime numbers found (STDOUT)
     cout << "numOfPrime=" << numOfPrimes << ", totalNums=" << totalNums << endl;
 
-    // print all these numbers. (out.txt)
+    // Printing all these numbers. (out.txt)
     write("The prime numbers are:");
     for (auto i = primeList.begin(); i != primeList.end(); i++)
     {
