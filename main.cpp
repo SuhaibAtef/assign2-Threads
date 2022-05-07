@@ -63,8 +63,15 @@ int main(int argc, char *argv[]) {
     file.open("in.txt");
 
     //Arguments 
-    if(argv[1] !=NULL)
+    if(argv[1] !=NULL){
         T= atoi(argv[1]) ;
+        if(T<=0)
+        {T=1;
+        cout<<"WRONG INPUT : Default Thread value (T=1) is used."<<endl;
+        }
+        }
+
+
     else T=1;
         cout<<T<<endl;
 
