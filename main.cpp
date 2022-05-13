@@ -40,12 +40,9 @@ void *Worker(void *tInput)
     // int range0 = n->r0;
     // int range1 = n->r1;
 
-    mtx.lock(); // Critical Section starts
-
     for (int j = n->r0; j < n->r1; j++)
     {
 
-        totalNums++;
         // if the number is prime increase the total prime numbers and push the number to the list.
         bool isPrime = true;
         for (int i = 2; i < j; i++)
@@ -53,15 +50,17 @@ void *Worker(void *tInput)
             if (j % i == 0)
                 isPrime = false;
         }
-
+        mtx.lock(); // Critical Section starts
         if (isPrime)
         {
             numOfPrimes++;
             primeList.push_back(j);
         }
+        totalNums++;
+        mtx.unlock(); // Critical Section Ends
     }
     // cout << "Exited thread " << n->numOfThreads << "   ID:" << pthread_self() << endl;
-    mtx.unlock(); // Critical Section Ends
+
     pthread_exit(NULL);
 }
 
