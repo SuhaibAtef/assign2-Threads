@@ -21,17 +21,6 @@ struct threadInp
 int numOfPrimes = 0, totalNums = 0;
 vector<int> primeList; // Vector to hold prime numbers.
 
-// isPrime function that tests if the number(num) is prime or not.
-bool isPrime(int num)
-{
-    for (int i = 2; i < num; i++)
-    {
-        if (num % i == 0)
-            return false;
-    }
-    return true;
-}
-
 // A function that appends the text(s) to the out.txt file.
 void write(string s)
 {
@@ -47,22 +36,31 @@ void *Worker(void *tInput)
 {
 
     threadInp *n = (threadInp *)tInput;
-    int range0 = n->r0;
-    int range1 = n->r1;
-    mtx.lock(); // Critical Section starts
-    cout << "ThreadID=" << n->numOfThreads << ", startNum=" << range0 << ", endNum=" << range1 << endl;
 
-    for (int i = range0; i < range1; i++)
+    // int range0 = n->r0;
+    // int range1 = n->r1;
+
+    mtx.lock(); // Critical Section starts
+
+    for (int j = n->r0; j < n->r1; j++)
     {
 
         totalNums++;
         // if the number is prime increase the total prime numbers and push the number to the list.
-        if (isPrime(i))
+        bool isPrime = true;
+        for (int i = 2; i < j; i++)
+        {
+            if (j % i == 0)
+                isPrime = false;
+        }
+
+        if (isPrime)
         {
             numOfPrimes++;
-            primeList.push_back(i);
+            primeList.push_back(j);
         }
     }
+    // cout << "Exited thread " << n->numOfThreads << "   ID:" << pthread_self() << endl;
     mtx.unlock(); // Critical Section Ends
     pthread_exit(NULL);
 }
@@ -109,7 +107,7 @@ int main(int argc, char *argv[])
     file.close();
 
     // Threads array to hold the threads.
-    pthread_t threads[T];
+    pthread_t *threads = new pthread_t[T];
 
     // StepSize = (floor(range/T));
     int stepSize = floor((range1 - range0) / T);
@@ -124,7 +122,8 @@ int main(int argc, char *argv[])
 
     int startRange = range0;
     int endRange = startRange + stepSize;
-    threadInp tInput[T];
+    struct threadInp *tInput;
+    tInput = (struct threadInp *)malloc(T * sizeof(struct threadInp));
     for (int i = 0; i < T; i++)
     {
         if (T > (range1 - range0))
@@ -143,12 +142,17 @@ int main(int argc, char *argv[])
         tInput[i].r0 = startRange;
         tInput[i].r1 = endRange;
         // 2) we create the thread.
-        int rc = pthread_create(&threads[i], NULL, Worker, &tInput[i]);
+        int rc = pthread_create(&threads[i], NULL, Worker, (void *)(&tInput[i]));
+
         // Case:: no thread was created.
         if (rc)
         {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
+        }
+        else
+        {
+            cout << "ThreadID=" << tInput[i].numOfThreads << ", startNum=" << tInput[i].r0 << ", endNum=" << tInput[i].r1 << endl;
         }
         // 3) we increase the pointers for the next thread.
         startRange = endRange;
