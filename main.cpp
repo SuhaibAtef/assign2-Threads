@@ -1,6 +1,5 @@
 #include "bits/stdc++.h"
 #include <pthread.h>
-#include <mutex> // mutex
 
 using namespace std;
 
@@ -10,8 +9,8 @@ How to use the file::
 - Run by ""./a.out T" command
 */
 
-mutex mtx; // mutex for critical section
-// Struct for passing input values for the threads.
+pthread_mutex_t plock;
+
 struct threadInp
 {
     int numOfThreads, r0, r1;
@@ -50,17 +49,17 @@ void *Worker(void *tInput)
             if (j % i == 0)
                 isPrime = false;
         }
-        mtx.lock(); // Critical Section starts
+        pthread_mutex_lock(&plock);
         if (isPrime)
         {
             numOfPrimes++;
             primeList.push_back(j);
         }
         totalNums++;
-        mtx.unlock(); // Critical Section Ends
+        pthread_mutex_unlock(&plock);
     }
     // cout << "Exited thread " << n->numOfThreads << "   ID:" << pthread_self() << endl;
-
+    // cout << "EXIT" << pthread_self() << endl;
     pthread_exit(NULL);
 }
 
@@ -104,7 +103,7 @@ int main(int argc, char *argv[])
         file >> range0 >> range1;
     }
     file.close();
-
+    primeList.reserve(range1 - range0);
     // Threads array to hold the threads.
     pthread_t *threads = new pthread_t[T];
 
@@ -121,8 +120,8 @@ int main(int argc, char *argv[])
 
     int startRange = range0;
     int endRange = startRange + stepSize;
-    struct threadInp *tInput;
-    tInput = (struct threadInp *)malloc(T * sizeof(struct threadInp));
+    threadInp tInput[T];
+    // tInput = (struct threadInp *)malloc(T * sizeof(struct threadInp));
     for (int i = 0; i < T; i++)
     {
         if (T > (range1 - range0))
@@ -142,7 +141,6 @@ int main(int argc, char *argv[])
         tInput[i].r1 = endRange;
         // 2) we create the thread.
         int rc = pthread_create(&threads[i], NULL, Worker, (void *)(&tInput[i]));
-
         // Case:: no thread was created.
         if (rc)
         {
@@ -161,6 +159,7 @@ int main(int argc, char *argv[])
     // (Joining Threads): all threads are done.
     for (int i = 0; i < T; i++)
     {
+        // cout << "JOIN " << threads[i] << endl;
         pthread_join(threads[i], NULL);
     }
 
