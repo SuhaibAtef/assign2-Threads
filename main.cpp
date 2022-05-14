@@ -162,9 +162,9 @@ int main(int argc, char *argv[])
         }
         else
         {
-
+            //
             if ((tInput[i].needed))
-                cout << "ThreadID=" << tInput[i].numOfThreads << ", startNum=" << tInput[i].r0 << ", endNum=" << tInput[i].r1 - 1 << endl;
+                cout << "ThreadID=" << tInput[i].numOfThreads << ", startNum=" << ((!(T > (range1 - range0 + 1)) && (i != 0)) ? tInput[i].r0 - 1 : tInput[i].r0) << ", endNum=" << tInput[i].r1 - 1 << endl;
             else
                 cout << "ThreadID=" << tInput[i].numOfThreads << " Not needed" << endl;
         }
