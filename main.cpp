@@ -14,6 +14,7 @@ pthread_mutex_t plock;
 struct threadInp
 {
     int numOfThreads, r0, r1;
+    bool needed;
 };
 
 // Global Variables
@@ -38,7 +39,10 @@ void *Worker(void *tInput)
 
     // int range0 = n->r0;
     // int range1 = n->r1;
-
+    if (!(n->needed))
+    {
+        pthread_exit(NULL);
+    }
     for (int j = n->r0; j < n->r1; j++)
     {
 
@@ -122,12 +126,21 @@ int main(int argc, char *argv[])
     int endRange = startRange + stepSize;
     threadInp tInput[T];
     // tInput = (struct threadInp *)malloc(T * sizeof(struct threadInp));
+    if (T > (range1 - range0 + 1))
+    {
+        cout << "You Just Saved : " << T - (range1 - range0 + 1) << endl;
+        // T = range1 - range0 + 1;
+    }
     for (int i = 0; i < T; i++)
     {
-        if (T > (range1 - range0 + 1))
+
+        if (i >= (range1 - range0 + 1))
         {
-            cout << "You Just Saved : " << T - (range1 - range0 + 1) << endl;
-            T = range1 - range0 + 1;
+            tInput[i].needed = false;
+        }
+        else
+        {
+            tInput[i].needed = true;
         }
         if (remainingSteps)
         {
@@ -149,7 +162,11 @@ int main(int argc, char *argv[])
         }
         else
         {
-            cout << "ThreadID=" << tInput[i].numOfThreads << ", startNum=" << tInput[i].r0 << ", endNum=" << tInput[i].r1 << endl;
+
+            if ((tInput[i].needed))
+                cout << "ThreadID=" << tInput[i].numOfThreads << ", startNum=" << tInput[i].r0 << ", endNum=" << tInput[i].r1 - 1 << endl;
+            else
+                cout << "ThreadID=" << tInput[i].numOfThreads << " Not needed" << endl;
         }
         // 3) we increase the pointers for the next thread.
         startRange = endRange;
