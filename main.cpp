@@ -108,10 +108,10 @@ int main(int argc, char *argv[])
     pthread_t *threads = new pthread_t[T];
 
     // StepSize = (floor(range/T));
-    int stepSize = floor((range1 - range0) / T);
+    int stepSize = floor((range1 - range0 + 1) / T);
 
     // RemainingSteps = range mod T ;
-    int remainingSteps = (range1 - range0) % T;
+    int remainingSteps = (range1 - range0 + 1) % T;
 
     /*
     Algorithm:  There are two pointers (startRange,endRange) that points to the start and end of the thread range
@@ -124,10 +124,10 @@ int main(int argc, char *argv[])
     // tInput = (struct threadInp *)malloc(T * sizeof(struct threadInp));
     for (int i = 0; i < T; i++)
     {
-        if (T > (range1 - range0))
+        if (T > (range1 - range0 + 1))
         {
-            cout << "You Just Saved : " << T - (range1 - range0) << endl;
-            T = range1 - range0;
+            cout << "You Just Saved : " << T - (range1 - range0 + 1) << endl;
+            T = range1 - range0 + 1;
         }
         if (remainingSteps)
         {
